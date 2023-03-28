@@ -7,11 +7,11 @@
 
 # COMMAND ----------
 
-display(dbutils.fs.ls("abfss://demo@formula1dl0123.dfs.core.windows.net"))
+display(dbutils.fs.ls("abfss://demo@formula1dl012.dfs.core.windows.net"))
 
 # COMMAND ----------
 
-display(spark.read.csv("abfss://demo@formula1dl0123.dfs.core.windows.net/circuits.csv"))
+display(spark.read.csv("abfss://demo@formula1dl012.dfs.core.windows.net/circuits.csv"))
 
 # COMMAND ----------
 

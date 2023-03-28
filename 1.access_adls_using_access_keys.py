@@ -7,22 +7,22 @@
 
 # COMMAND ----------
 
-formula1dl_account_key= dbutils.secrets.get(scope= 'formula1-scope',key= 'formula1dl-account-key')
+formula1dl_account_key= dbutils.secrets.get(scope= 'formula1-scope',key= 'formula1-account-key')
 
 # COMMAND ----------
 
 spark.conf.set(
-    "fs.azure.account.key.formula1dl0123.dfs.core.windows.net",
+    "fs.azure.account.key.formula1dl012.dfs.core.windows.net",
     formula1dl_account_key)
-   ## "mytjG2a/sNFNCRAVuX09WpJZd9SICH4e/IzV7uJj/gAkHXGBXXp2GEbfkYzqQAgx5xuIX9BR5x2Q+AStwi90gw==")
+   
 
 # COMMAND ----------
 
-display(dbutils.fs.ls("abfss://demo@formula1dl0123.dfs.core.windows.net"))
+display(dbutils.fs.ls("abfss://demo@formula1dl012.dfs.core.windows.net"))
 
 # COMMAND ----------
 
-display(spark.read.csv("abfss://demo@formula1dl0123.dfs.core.windows.net/circuits.csv"))
+display(spark.read.csv("abfss://demo@formula1dl012.dfs.core.windows.net/circuits.csv"))
 
 # COMMAND ----------
 
