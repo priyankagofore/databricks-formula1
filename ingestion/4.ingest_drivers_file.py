@@ -9,6 +9,19 @@
 
 # COMMAND ----------
 
+# MAGIC %run "../includes/configuration"
+
+# COMMAND ----------
+
+# MAGIC %run "../includes/common_functions"
+
+# COMMAND ----------
+
+dbutils.widgets.text('p_data_source','')
+v_data_source = dbutils.widgets.get('p_data_source')
+
+# COMMAND ----------
+
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType,DateType
 
 # COMMAND ----------
@@ -31,7 +44,7 @@ drivers_schema = StructType(fields=[StructField("driverId", IntegerType(),True),
 
 # COMMAND ----------
 
-drivers_df = spark.read.schema(drivers_schema).json("/mnt/formula1dl012/raw/drivers.json")
+drivers_df = spark.read.schema(drivers_schema).json(f"{raw_folder_path}/drivers.json")
 
 # COMMAND ----------
 
@@ -50,9 +63,13 @@ from pyspark.sql.functions import current_timestamp, col, lit,concat
 
 drivers_renamed_df = drivers_df.withColumnRenamed("driverID","driver_id")  \
                                .withColumnRenamed("driverRef","driver_ref") \
-                               .withColumn("ingestion_date", current_timestamp()) \
-                               .withColumn("name",concat(col('name.forename'), lit(' '), col('name.surname'))
-                               )
+                               .withColumn("name",concat(col('name.forename'), lit(' '), col('name.surname')) )\
+                               .withColumn("v_data_source", lit(v_data_source))
+                               
+
+# COMMAND ----------
+
+drivers_renamed_df = add_ingestion_date(drivers_renamed_df)
 
 # COMMAND ----------
 
@@ -73,4 +90,12 @@ drivers_final_df = drivers_renamed_df.drop(col("url"))
 
 # COMMAND ----------
 
-drivers_final_df.write.mode('overwrite').parquet('/mnt/formula1dl012/processed/drivers')
+drivers_final_df.write.mode('overwrite').parquet(f'{processed_folder_path}/drivers')
+
+# COMMAND ----------
+
+display(spark.read.parquet(f'{processed_folder_path}/drivers'))
+
+# COMMAND ----------
+
+dbutils.notebook.exit("Success")
