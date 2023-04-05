@@ -86,7 +86,7 @@ display(spark.read.parquet(f'{processed_folder_path}/races'))
 
 # COMMAND ----------
 
-races_renamed_df.write.mode('overwrite').partitionBy('race_year').parquet('f{processed_folder_path}/races')
+races_renamed_df.write.mode('overwrite').partitionBy('race_year').format("parquet").saveAsTable("f1_processed.races")
 
 # COMMAND ----------
 

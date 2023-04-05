@@ -69,7 +69,7 @@ display(qualifying_final_df)
 
 # COMMAND ----------
 
-qualifying_final_df.write.mode('overwrite').parquet(f"{processed_folder_path}/qualify")
+qualifying_final_df.write.mode('overwrite').format('parquet').saveAsTable("f1_processed.qualify")
 
 # COMMAND ----------
 
