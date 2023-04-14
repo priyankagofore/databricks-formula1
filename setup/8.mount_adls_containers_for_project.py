@@ -44,3 +44,15 @@ mount_adls('formula1dl012','processed')
 # COMMAND ----------
 
 mount_adls('formula1dl012','presentation')
+
+# COMMAND ----------
+
+mount_adls('formula1dl012','demo')
+
+# COMMAND ----------
+
+dbutils.fs.ls("/mnt/formula1dl012/demo/")
+
+# COMMAND ----------
+
+

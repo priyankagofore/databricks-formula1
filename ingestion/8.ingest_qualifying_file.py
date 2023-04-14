@@ -17,6 +17,11 @@ v_data_source = dbutils.widgets.get('p_data_source')
 
 # COMMAND ----------
 
+dbutils.widgets.text('p_file_date',"2021-03-28")
+v_file_date = dbutils.widgets.get('p_file_date')
+
+# COMMAND ----------
+
 from pyspark.sql.types import StringType, StructField, StructType, DoubleType, IntegerType
 
 # COMMAND ----------
@@ -35,7 +40,7 @@ qualifying_schema = StructType(fields=[StructField("qualifyId",IntegerType(),Fal
 
 # COMMAND ----------
 
-qualifying_df = spark.read.schema(qualifying_schema).option('multiline',True).json(f'{raw_folder_path}/qualifying')
+qualifying_df = spark.read.schema(qualifying_schema).option('multiline',True).json(f'{raw_folder_path}/{v_file_date}/qualifying')
 
 # COMMAND ----------
 
@@ -52,7 +57,7 @@ from pyspark.sql.functions import current_timestamp,lit
 
 # COMMAND ----------
 
-qualifying_final_df = qualifying_df.withColumnRenamed("qualifyId","qualify_id").withColumnRenamed("driverId","driver_id").withColumnRenamed("raceId","race_id").withColumn("v_data_source", lit(v_data_source)) 
+qualifying_final_df = qualifying_df.withColumnRenamed("qualifyId","qualify_id").withColumnRenamed("driverId","driver_id").withColumnRenamed("raceId","race_id").withColumn("v_data_source", lit(v_data_source)).withColumn("file_date",lit(v_file_date))
 
 # COMMAND ----------
 
@@ -69,12 +74,19 @@ display(qualifying_final_df)
 
 # COMMAND ----------
 
-qualifying_final_df.write.mode('overwrite').format('parquet').saveAsTable("f1_processed.qualify")
-
-# COMMAND ----------
-
-display(spark.read.parquet(f'{processed_folder_path}/qualify'))
+overwrite_partition(qualifying_final_df,'f1_processed','qualifying','race_id')
 
 # COMMAND ----------
 
 dbutils.notebook.exit("Success")
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select race_id,count(1)
+# MAGIC from f1_processed.qualifying
+# MAGIC group by race_id;
+
+# COMMAND ----------
+
+

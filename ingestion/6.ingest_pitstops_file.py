@@ -22,6 +22,11 @@ v_data_source = dbutils.widgets.get('p_data_source')
 
 # COMMAND ----------
 
+dbutils.widgets.text('p_file_date',"2021-03-28")
+v_file_date = dbutils.widgets.get('p_file_date')
+
+# COMMAND ----------
+
 from pyspark.sql.types import StructField, StructType, StringType, IntegerType, DoubleType
 
 # COMMAND ----------
@@ -37,7 +42,7 @@ pit_stops_schema = StructType(fields=[StructField("raceId",IntegerType(),False),
 
 # COMMAND ----------
 
-pit_stops_df = spark.read.schema(pit_stops_schema).option('multiline',True).json(f"{raw_folder_path}/pit_stops.json")
+pit_stops_df = spark.read.schema(pit_stops_schema).option('multiline',True).json(f"{raw_folder_path}/{v_file_date}/pit_stops.json")
 
 # COMMAND ----------
 
@@ -52,7 +57,8 @@ from pyspark.sql.functions import current_timestamp, lit
 
 pit_stops_final_df = pit_stops_df.withColumnRenamed("driverId","driver_id") \
 .withColumnRenamed("raceId","race_id") \
-.withColumn("v_data_source",lit(v_data_source))    
+.withColumn("v_data_source",lit(v_data_source))   \
+.withColumn("file_date",lit(v_file_date))     
   
 
 # COMMAND ----------
@@ -63,6 +69,10 @@ pit_stops_final_df = add_ingestion_date(pit_stops_final_df)
 
 # MAGIC %md
 # MAGIC #### Step-3 Write the output to the processed container using Dataframe Writer API
+
+# COMMAND ----------
+
+overwrite_partition(pit_stops_final_df,'f1_processed','pitstops','race_id')
 
 # COMMAND ----------
 
