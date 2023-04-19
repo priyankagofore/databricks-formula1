@@ -96,11 +96,12 @@ drivers_final_df = drivers_renamed_df.drop(col("url"))
 
 # COMMAND ----------
 
-drivers_final_df.write.mode('overwrite').format('parquet').saveAsTable('f1_processed.drivers')
+drivers_final_df.write.mode('overwrite').format('delta').saveAsTable('f1_processed.drivers')
 
 # COMMAND ----------
 
-display(spark.read.parquet(f'{processed_folder_path}/drivers'))
+# MAGIC %sql
+# MAGIC SELECT * from f1_processed.drivers;
 
 # COMMAND ----------
 

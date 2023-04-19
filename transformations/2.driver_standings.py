@@ -22,7 +22,7 @@ v_file_date = dbutils.widgets.get('p_file_date')
 
 # COMMAND ----------
 
-race_results_list = spark.read.parquet(f"{presentation_folder_path}/race_results")\
+race_results_list = spark.read.format('delta').load(f"{presentation_folder_path}/race_results")\
 .filter(f"file_date ='{v_file_date}'")\
 .select('race_year')\
 .distinct()\
@@ -40,12 +40,8 @@ print(race_year_list)
 
 from pyspark.sql.functions import col
 
-race_results_df = spark.read.parquet(f"{presentation_folder_path}/race_results")\
+race_results_df = spark.read.format('delta').load(f"{presentation_folder_path}/race_results")\
 .filter(col("race_year").isin(race_year_list))
-
-# COMMAND ----------
-
-display(race_results_df)
 
 # COMMAND ----------
 
@@ -53,7 +49,7 @@ from pyspark.sql.functions import aggregate,sum,col,count,when
 
 # COMMAND ----------
 
-drivers_standing_df = race_results_df.groupBy("race_year", "driver_name", "driver_nationality", "team") \
+drivers_standing_df = race_results_df.groupBy("race_year", "driver_name", "driver_nationality") \
 .agg(sum("points").alias("total_points"), 
  count(when(col("position")== 1, True)).alias ("wins"))
 
@@ -67,13 +63,13 @@ final_df = drivers_standing_df.withColumn("rank", rank().over(driverRankSpec))
 
 # COMMAND ----------
 
-display(final_df)
-
-# COMMAND ----------
-
-overwrite_partition(final_df,'f1_presentation','driver_standings','race_year')
+merge_condition= " tgt.race_year = src.race_year AND tgt.driver_name= src.driver_name"
+merge_delta_data(final_df, 'f1_presentation', 'driver_standings', presentation_folder_path, merge_condition, 'race_year')
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC SELECT * from f1_presentation.driver_standings;
+# MAGIC SELECT race_year, count(1)
+# MAGIC FROM f1_presentation.driver_standings
+# MAGIC group by race_year
+# MAGIC ORDER BY race_year desc;

@@ -72,16 +72,25 @@ pit_stops_final_df = add_ingestion_date(pit_stops_final_df)
 
 # COMMAND ----------
 
-overwrite_partition(pit_stops_final_df,'f1_processed','pitstops','race_id')
+#overwrite_partition(pit_stops_final_df,'f1_processed','pit_stops','race_id')
 
 # COMMAND ----------
 
-pit_stops_final_df.write.mode('overwrite').format('parquet').saveAsTable("f1_processed.pit_stops")
-
-# COMMAND ----------
-
-display(spark.read.parquet(f"{processed_folder_path}/pit_stops"))
+merge_condition= " tgt.race_id = src.race_id AND tgt.driver_id= src.driver_id AND tgt.stop= src.stop AND tgt.race_id = src.race_id "
+merge_delta_data(pit_stops_final_df, 'f1_processed', 'pitstops', processed_folder_path, merge_condition, 'race_id')
 
 # COMMAND ----------
 
 dbutils.notebook.exit("Success")
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select race_id,count(1)
+# MAGIC from f1_processed.pitstops
+# MAGIC group by race_id 
+# MAGIC ORDER BY race_id desc;
+
+# COMMAND ----------
+
+

@@ -85,6 +85,15 @@ results_final_df = result_renamed_df.drop("StatusId")
 # COMMAND ----------
 
 # MAGIC %md
+# MAGIC #### De-dupe the dataframe
+
+# COMMAND ----------
+
+results_deduped_df = results_final_df.drop_duplicates(['race_id','driver_id'])
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC #### Step-4 Write the output to the processed container using Dataframe Writer API
 
 # COMMAND ----------
@@ -121,18 +130,37 @@ results_final_df = result_renamed_df.drop("StatusId")
 
 # COMMAND ----------
 
-overwrite_partition(results_final_df,'f1_processed','results','race_id')
+# overwrite_partition(results_final_df,'f1_processed','results','race_id')
 
 # COMMAND ----------
+
+merge_condition= "tgt.result_id=src.result_id AND tgt.race_id = src.race_id"
+merge_delta_data(results_deduped_df, 'f1_processed', 'results', processed_folder_path, merge_condition, 'race_id')
+
+# COMMAND ----------
+
+
 
 dbutils.notebook.exit("Success")
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC select race_id,count(1)
-# MAGIC from f1_processed.results
-# MAGIC group by race_id;
+# MAGIC SELECT count(1) FROM f1_processed.results
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC SELECT race_id,driver_id, count(1)
+# MAGIC FROM f1_processed.results 
+# MAGIC GROUP BY race_id,driver_id
+# MAGIC HAVING count(1) > 1
+# MAGIC ORDER BY race_id,driver_id desc;
+
+# COMMAND ----------
+
+# MAGIC %sql 
+# MAGIC SELECT * FROM f1_processed.results WHERE race_id = 540 and driver_id = 229;
 
 # COMMAND ----------
 

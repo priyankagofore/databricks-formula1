@@ -91,11 +91,12 @@ races_renamed_df = races_selected_df.withColumnRenamed("raceId","race_id").withC
 
 # COMMAND ----------
 
-races_renamed_df.write.mode('overwrite').partitionBy('race_year').format("parquet").saveAsTable("f1_processed.races")
+races_renamed_df.write.mode('overwrite').partitionBy('race_year').format("delta").saveAsTable("f1_processed.races")
 
 # COMMAND ----------
 
-display(races_renamed_df)
+# MAGIC %sql
+# MAGIC SELECT * from f1_processed.races;
 
 # COMMAND ----------
 

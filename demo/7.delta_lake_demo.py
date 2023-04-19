@@ -28,7 +28,7 @@ results_df.write.mode('overwrite').format('delta').save("/mnt/formula1dl012/demo
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC CREATE TABLE f1_demo.results_external
+# MAGIC CREATE TABLE if not exists f1_demo.results_external
 # MAGIC USING DELTA
 # MAGIC LOCATION '/mnt/formula1dl012/demo/results_external'
 
@@ -55,8 +55,14 @@ results_df.write.mode('overwrite').format('delta').partitionBy("constructorId").
 
 # COMMAND ----------
 
-# MAGIC %sql 
-# MAGIC SELECT * FROM f1_demo.results_managed;
+from delta.tables import DeltaTable
+
+deltaTable = DeltaTable.forPath(spark, '/mnt/formula1dl012/demo/results_managed')
+
+# Declare the predicate by using a SQL-formatted string.
+deltaTable.update("position <= 10", { "points": "'21-position'" }
+)
+
 
 # COMMAND ----------
 
@@ -65,9 +71,13 @@ from delta.tables import DeltaTable
 deltaTable = DeltaTable.forPath(spark, '/mnt/formula1dl012/demo/results_managed')
 
 # Declare the predicate by using a SQL-formatted string.
-deltaTable.update("position >= 10", { "points": "'21-position'" }
+deltaTable.delete("position <=  10"
 )
 
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### Upsert using merge
 
 # COMMAND ----------
 

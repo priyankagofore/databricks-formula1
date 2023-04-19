@@ -65,16 +65,13 @@ qualifying_final_df = add_ingestion_date(qualifying_final_df)
 
 # COMMAND ----------
 
-display(qualifying_final_df)
-
-# COMMAND ----------
-
 # MAGIC %md
 # MAGIC #### Step-3 Write the output to the processed container using Dataframe Writer API
 
 # COMMAND ----------
 
-overwrite_partition(qualifying_final_df,'f1_processed','qualifying','race_id')
+merge_condition= "tgt.qualify_id=src.qualify_id"
+merge_delta_data(qualifying_final_df, 'f1_processed', 'qualifying', processed_folder_path, merge_condition, 'race_id')
 
 # COMMAND ----------
 
@@ -85,7 +82,8 @@ dbutils.notebook.exit("Success")
 # MAGIC %sql
 # MAGIC select race_id,count(1)
 # MAGIC from f1_processed.qualifying
-# MAGIC group by race_id;
+# MAGIC group by race_id
+# MAGIC ORDER BY race_id desc;
 
 # COMMAND ----------
 
